@@ -1,58 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Test Automation Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<header class="header">
-    <div class="container">
-        <h1>Test Automation Dashboard</h1>
+<!-- Top bar -->
+<header class="top-bar">
+    <div class="container top-inner">
+        <div class="brand">
+            <h1>Test Automation Dashboard</h1>
+            <p class="subtitle">Run history & test status at a glance</p>
+        </div>
+
+        <div class="controls">
+            <!-- Search -->
+            <label class="search">
+                <input id="search-input" type="search" placeholder="Search Run ID, Env, Status..." />
+            </label>
+
+            <!-- Status filter -->
+            <select id="status-filter" aria-label="Filter by status">
+                <option value="">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="Failed">Failed</option>
+                <option value="Running">Running</option>
+                <option value="Scheduled">Scheduled</option>
+            </select>
+
+            <!-- Env filter -->
+            <select id="env-filter" aria-label="Filter by environment">
+                <option value="">All Environments</option>
+                <option value="QA">QA</option>
+                <option value="Stage">Stage</option>
+                <option value="Prod">Production</option>
+            </select>
+
+            <!-- Theme toggle -->
+            <label class="theme-toggle" title="Toggle light / dark">
+                <input id="themeSwitch" type="checkbox" aria-hidden="true" />
+                <span class="slider" aria-hidden="true"></span>
+            </label>
+
+            <!-- Refresh -->
+            <button class="btn refresh-btn" id="refreshBtn" title="Reload data">⟳</button>
+        </div>
     </div>
 </header>
 
-<div class="container">
-    <div class="summary-grid" id="summary-grid">
+<main class="container main-grid">
+
+    <!-- Summary cards (IDs preserved) -->
+    <section class="summary-grid" id="summary-grid" aria-label="Summary cards">
         <div class="stat-card">
             <h3>Total Runs</h3>
             <p id="total-runs">0</p>
         </div>
+
         <div class="stat-card stat-completed">
             <h3>Completed</h3>
             <p id="total-completed">0</p>
         </div>
+
         <div class="stat-card stat-failed">
             <h3>Failed</h3>
             <p id="total-failed">0</p>
         </div>
+
         <div class="stat-card stat-running">
             <h3>In Progress</h3>
             <p id="total-running">0</p>
         </div>
-    </div>
+    </section>
 
-    <div class="table-container">
-        <h2>Run History</h2>
-        <table id="runs-table">
-            <thead>
-            <tr>
-                <th>Run ID</th>
-                <th>Environment</th>
-                <th>Status</th>
-                <th>Failed</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Report</th>
-            </tr>
-            </thead>
-            <tbody id="runs-table-body">
-            <tr><td colspan="7">Loading...</td></tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+    <!-- Table -->
+    <section class="table-container" aria-label="Run history table">
+        <div class="table-header">
+            <h2>Run History</h2>
+            <p class="muted">Latest test runs from your CI / Worker</p>
+        </div>
+
+        <div class="table-scroll">
+            <table id="runs-table" role="table">
+                <thead>
+                <tr>
+                    <th>Run ID</th>
+                    <th>Environment</th>
+                    <th>Status</th>
+                    <th>Failed</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Report</th>
+                </tr>
+                </thead>
+
+                <tbody id="runs-table-body">
+                <!-- Keep initial placeholder — your script.js will replace -->
+                <tr><td colspan="7">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-actions">
+            <span class="muted small">Tip: use search/filter to find runs quickly.</span>
+        </div>
+    </section>
+</main>
+
+<!-- Keep your existing script.js (it will populate the same IDs) -->
+<script>
+    // Theme toggle logic (keeps user preference)
+    const themeSwitch = document.getElementById('themeSwitch');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeSwitch.checked = true;
+    }
+
+    themeSwitch.addEventListener('change', () => {
+        if (themeSwitch.checked) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    // Simple wiring for search/filter UI so your script can hook into them
+    // (If your script already attaches events to these IDs, this harmlessly coexists.)
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        // If you have a reload function in script.js, call it here.
+        // Fallback: reload the page.
+        if (typeof reloadData === 'function') {
+            reloadData();
+        } else {
+            location.reload();
+        }
+    });
+
+    // Debounced search event to reduce noise (optional, your script can override)
+    const searchEl = document.getElementById('search-input');
+    let searchTimer = null;
+    searchEl.addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            const ev = new CustomEvent('dashboard:search', { detail: e.target.value });
+            window.dispatchEvent(ev);
+        }, 250);
+    });
+
+    // Dispatch filter change events
+    ['status-filter', 'env-filter'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('change', (e) => {
+            const ev = new CustomEvent('dashboard:filter', { detail: { id, value: e.target.value }});
+            window.dispatchEvent(ev);
+        });
+    });
+</script>
 
 <script src="script.js"></script>
 </body>
