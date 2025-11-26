@@ -95,19 +95,6 @@ The framework supports **parallel test execution**, **asynchronous job processin
 | PB9 | Docker Compose | Medium |
 
 
-
-## ⚠️ Risks & Mitigation
-
-| Risk | Mitigation |
-|------|------------|
-| Worker crash | Retry + DLQ |
-| Parallel conflicts | Thread-safe executor |
-| RabbitMQ downtime | Auto-restart policies |
-| Flaky UI tests | Retry + screenshots |
-| DB schema issues | Migration scripts |
-
----
-
 ## 🏁 Outcomes
 
 - Faster regression cycles  
@@ -118,22 +105,9 @@ The framework supports **parallel test execution**, **asynchronous job processin
 
 ---
 
-## 📥 Run Locally
-
-```bash
-git clone <repo-url>
-docker-compose up --build
-```
-
 ---
-
-## 🤝 Contributing
-
-1. Fork  
-2. Create branch  
-3. Commit  
-4. PR  
-
+## Author
+Akshat Prakash Srivastava
 ---
 
 
