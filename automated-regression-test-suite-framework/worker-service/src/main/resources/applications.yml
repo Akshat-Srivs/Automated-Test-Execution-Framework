@@ -1,0 +1,31 @@
+server:
+  port: 8081
+
+spring:
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:user}
+    password: ${SPRING_RABBITMQ_PASSWORD:password}
+
+rabbitmq:
+  queue:
+    name: test_run_jobs_queue
+  exchange:
+    name: test_run_exchange
+  routing:
+    key: test_run_jobs_key
+  listeners:
+    concurrent: 5
+    max-concurrent: 10
+
+api:
+  base:
+    url: http://localhost:8080
+
+selenium:
+  hub:
+    url: http://localhost:4444
+
+test:
+  max-retries: 3
